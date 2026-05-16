@@ -14,10 +14,7 @@ workflows:
       - name: Get Flutter packages
         script: flutter packages pub get
 
-      - name: Fix Ruby for CocoaPods
-        script: |
-         rbenv global 3.2.2
-
+  
 
       - name: Pod install
         script: |
