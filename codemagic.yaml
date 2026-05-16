@@ -1,20 +1,37 @@
 
 workflows:
   ios-workflow:
-    name: iOS IPA Build
+    name: Build vxkit
     instance_type: mac_mini_m1
     max_build_duration: 60
     environment:
-      groups:
-        - app_store_credentials
       flutter: stable
       xcode: latest
-      cocoapods: default
     scripts:
-      - name: Get Flutter packages
-        script: flutter packages pub get
-      - name: Flutter build ipa
+      - name: Nettoyage et Régénération
         script: |
-          flutter build ipa --release --no-codesign
+          rm -rf ios
+          flutter create --platforms ios .
+          flutter clean
+          flutter packages pub get
+      - name: Forcer la suppression de la signature (Patch Xcode)
+        script: |
+          # Ce script modifie le projet Xcode pour supprimer l'exigence de Team ID et de Signature
+          sed -i '' 's/DEVELOPMENT_TEAM = [^;]*;//g' ios/Runner.xcodeproj/project.pbxproj
+          sed -i '' 's/CODE_SIGN_STYLE = Automatic;/CODE_SIGN_STYLE = Manual;/g' ios/Runner.xcodeproj/project.pbxproj
+          sed -i '' 's/CODE_SIGN_IDENTITY = "iPhone Developer";/CODE_SIGN_IDENTITY = "";/g' ios/Runner.xcodeproj/project.pbxproj
+          
+          # On configure Pods pour ignorer aussi la signature
+          cd ios && pod install && cd ..
+      - name: Compilation brute iOS
+        script: | 
+          # On compile sans aucune vérification de signature
+          flutter build ios --release --no-codesign
+      - name: Création du package IPA pour Sideloadly
+        script: | 
+          cd build/ios/iphoneos
+          mkdir -p Payload
+          cp -r Runner.app Payload/
+          zip -r $CM_BUILD_DIR/vxkit.ipa Payload
     artifacts:
-      - build/ios/ipa/*.ipa
+      - "*.ipa"
