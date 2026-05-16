@@ -16,7 +16,7 @@ workflows:
 
       - name: Fix Ruby for CocoaPods
         script: |
-        rbenv global 3.2.2
+         rbenv global 3.2.2
 
 
       - name: Pod install
