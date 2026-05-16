@@ -1,4 +1,4 @@
-```yaml
+
 workflows:
   ios-workflow:
     name: Build vxkit
@@ -35,5 +35,3 @@ workflows:
           zip -r $CM_BUILD_DIR/vxkit.ipa Payload
     artifacts:
       - "*.ipa"
-
-```
